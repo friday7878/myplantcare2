@@ -1,0 +1,11 @@
+{
+  "name": "MY PLANT CARE",
+  "description": "Grow Green. Live Clean. Let PLANTY Care! Advanced AI-Powered Plant Care, Disease Doctor, Smart Watering Schedules & Digital Botanical Garden.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

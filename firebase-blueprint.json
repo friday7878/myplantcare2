@@ -1,0 +1,194 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with gardening eco score and role",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 150 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "ecoScore": { "type": "number" },
+        "language": { "type": "string", "enum": ["en", "ta"], "maxLength": 10 },
+        "role": { "type": "string", "enum": ["user", "admin"], "maxLength": 20 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Plant": {
+      "title": "Plant",
+      "description": "User digital garden plant record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "commonName": { "type": "string", "maxLength": 100 },
+        "scientificName": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "maxLength": 50 },
+        "photoUrl": { "type": "string", "maxLength": 2000 },
+        "plantingDate": { "type": "string", "maxLength": 30 },
+        "indoorOutdoor": { "type": "string", "enum": ["indoor", "outdoor"], "maxLength": 20 },
+        "location": { "type": "string", "maxLength": 100 },
+        "sunlightRequirement": { "type": "string", "maxLength": 50 },
+        "wateringFrequencyDays": { "type": "number" },
+        "soilType": { "type": "string", "maxLength": 100 },
+        "healthStatus": { "type": "string", "enum": ["healthy", "warning", "critical"], "maxLength": 20 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "category", "wateringFrequencyDays", "createdAt"]
+    },
+    "WateringSchedule": {
+      "title": "WateringSchedule",
+      "description": "Scheduled watering reminder for a plant",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "plantId": { "type": "string", "maxLength": 128 },
+        "plantName": { "type": "string", "maxLength": 100 },
+        "intervalDays": { "type": "number" },
+        "nextWateringDate": { "type": "string", "maxLength": 30 },
+        "lastWateredDate": { "type": "string", "maxLength": 30 },
+        "status": { "type": "string", "enum": ["upcoming", "due_today", "overdue", "completed"], "maxLength": 20 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "plantId", "plantName", "intervalDays", "nextWateringDate", "createdAt"]
+    },
+    "WateringLog": {
+      "title": "WateringLog",
+      "description": "Historical log entry of completed watering",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "plantId": { "type": "string", "maxLength": 128 },
+        "plantName": { "type": "string", "maxLength": 100 },
+        "wateredAt": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "plantId", "plantName", "wateredAt", "createdAt"]
+    },
+    "GrowthRecord": {
+      "title": "GrowthRecord",
+      "description": "Growth metric entry for tracking plant progression",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "plantId": { "type": "string", "maxLength": 128 },
+        "heightCm": { "type": "number" },
+        "leafCount": { "type": "number" },
+        "observation": { "type": "string", "maxLength": 1000 },
+        "photoUrl": { "type": "string", "maxLength": 2000 },
+        "recordedDate": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "plantId", "recordedDate", "createdAt"]
+    },
+    "Diagnosis": {
+      "title": "Diagnosis",
+      "description": "Plant health diagnosis or rescue treatment plan",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "plantId": { "type": "string", "maxLength": 128 },
+        "plantName": { "type": "string", "maxLength": 100 },
+        "photoUrl": { "type": "string", "maxLength": 2000 },
+        "symptoms": { "type": "string", "maxLength": 1000 },
+        "possibleProblem": { "type": "string", "maxLength": 200 },
+        "severity": { "type": "string", "enum": ["mild", "moderate", "severe"], "maxLength": 20 },
+        "treatment": { "type": "string", "maxLength": 3000 },
+        "prevention": { "type": "string", "maxLength": 2000 },
+        "wateringAdvice": { "type": "string", "maxLength": 1000 },
+        "sunlightAdvice": { "type": "string", "maxLength": 1000 },
+        "fertilizerAdvice": { "type": "string", "maxLength": 1000 },
+        "isRescueMode": { "type": "string", "maxLength": 10 },
+        "status": { "type": "string", "enum": ["active", "recovered", "archived"], "maxLength": 20 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "possibleProblem", "treatment", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Persistent chat interaction with PLANTY AI",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["user", "assistant"], "maxLength": 20 },
+        "content": { "type": "string", "maxLength": 5000 },
+        "language": { "type": "string", "maxLength": 10 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "role", "content", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app reminder or alert notification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "maxLength": 50 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "category", "read", "createdAt"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Badge awarded for gardening milestones",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "badgeId": { "type": "string", "maxLength": 50 },
+        "badgeName": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 300 },
+        "icon": { "type": "string", "maxLength": 50 },
+        "unlockedAt": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "badgeId", "badgeName", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile with eco-score and preferences"
+    },
+    "/plants/{plantId}": {
+      "schema": "Plant",
+      "description": "Collection of user plants in their digital garden"
+    },
+    "/watering_schedules/{scheduleId}": {
+      "schema": "WateringSchedule",
+      "description": "Scheduled watering reminders"
+    },
+    "/watering_history/{logId}": {
+      "schema": "WateringLog",
+      "description": "Historical log entries of plant waterings"
+    },
+    "/growth_records/{recordId}": {
+      "schema": "GrowthRecord",
+      "description": "Growth tracking entries with height, leaf count, and photos"
+    },
+    "/diagnoses/{diagnosisId}": {
+      "schema": "Diagnosis",
+      "description": "Plant health and rescue treatment records"
+    },
+    "/chat_history/{chatId}": {
+      "schema": "ChatMessage",
+      "description": "User conversation logs with PLANTY companion"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "In-app notifications and alerts"
+    },
+    "/achievements/{achievementId}": {
+      "schema": "Achievement",
+      "description": "User unlocked gardening achievement badges"
+    }
+  }
+}

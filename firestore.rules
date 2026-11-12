@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (Pillar 1)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test document
+    match /test/connection {
+      allow read: if true;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // PII isolation - no listing of users
+      allow create: if isOwner(userId)
+        && incoming().email is string && incoming().email.size() <= 150
+        && incoming().createdAt is timestamp;
+      allow update: if isOwner(userId)
+        && incoming().email == existing().email
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(userId);
+    }
+
+    // Plants Collection
+    match /plants/{plantId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(plantId)
+        && incoming().userId == request.auth.uid
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().category is string && incoming().category.size() <= 50
+        && incoming().wateringFrequencyDays is number
+        && incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Watering Schedules
+    match /watering_schedules/{scheduleId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(scheduleId)
+        && incoming().userId == request.auth.uid
+        && incoming().plantId is string && incoming().plantId.size() <= 128
+        && incoming().plantName is string && incoming().plantName.size() <= 100
+        && incoming().intervalDays is number
+        && incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Watering History Logs
+    match /watering_history/{logId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(logId)
+        && incoming().userId == request.auth.uid
+        && incoming().plantId is string && incoming().plantId.size() <= 128
+        && incoming().createdAt is timestamp;
+      allow update: if false; // History logs are immutable
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Growth Records
+    match /growth_records/{recordId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(recordId)
+        && incoming().userId == request.auth.uid
+        && incoming().plantId is string && incoming().plantId.size() <= 128
+        && incoming().recordedDate is string
+        && incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Diagnoses & Rescue Records
+    match /diagnoses/{diagnosisId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(diagnosisId)
+        && incoming().userId == request.auth.uid
+        && incoming().possibleProblem is string && incoming().possibleProblem.size() <= 200
+        && incoming().treatment is string && incoming().treatment.size() <= 3000
+        && incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Chat History
+    match /chat_history/{chatId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(chatId)
+        && incoming().userId == request.auth.uid
+        && incoming().role in ['user', 'assistant']
+        && incoming().content is string && incoming().content.size() <= 5000
+        && incoming().createdAt is timestamp;
+      allow update: if false;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(notificationId)
+        && incoming().userId == request.auth.uid
+        && incoming().title is string && incoming().title.size() <= 150
+        && incoming().message is string && incoming().message.size() <= 500
+        && incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Achievements
+    match /achievements/{achievementId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(achievementId)
+        && incoming().userId == request.auth.uid
+        && incoming().badgeId is string && incoming().badgeId.size() <= 50
+        && incoming().createdAt is timestamp;
+      allow update: if false;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}
